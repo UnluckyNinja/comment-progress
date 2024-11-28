@@ -16,7 +16,7 @@ jobs:
     name: Normal mode progress for issue comments
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: normal mode - create comment
         uses: hasura/comment-progress@test
@@ -44,7 +44,7 @@ jobs:
     name: Append mode progress for issue comments
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: append mode - create comment
         uses: hasura/comment-progress@test
@@ -73,7 +73,7 @@ jobs:
     name: Recreate mode progress for issue comments
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: recreate mode - create comment
         uses: hasura/comment-progress@test
@@ -102,7 +102,7 @@ jobs:
     name: Normal mode progress for commit comments
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: normal mode - create comment
         uses: hasura/comment-progress@test
@@ -130,7 +130,7 @@ jobs:
     name: Append mode progress for commit comments
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: append mode - create comment
         uses: hasura/comment-progress@test
@@ -159,7 +159,7 @@ jobs:
     name: Recreate mode progress for commit comments
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: recreate mode - create comment
         uses: hasura/comment-progress@test
@@ -189,7 +189,7 @@ jobs:
     continue-on-error: true
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Should error out and not comment anything
         uses: hasura/comment-progress@test
@@ -208,7 +208,7 @@ jobs:
     continue-on-error: true
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Error out
         uses: hasura/comment-progress@test
@@ -226,7 +226,7 @@ jobs:
     continue-on-error: true
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Error out
         uses: hasura/comment-progress@test
@@ -242,7 +242,7 @@ jobs:
     continue-on-error: true
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Should comment and fail this job
         uses: hasura/comment-progress@test

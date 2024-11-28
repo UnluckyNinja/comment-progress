@@ -2,10 +2,11 @@
   "name": "comment-progress",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/index.js",
+  "type": "module",
   "scripts": {
-    "build": "ncc build index.js --license licenses.txt",
-    "lint": "eslint **/*.js"
+    "build": "ncc build -o dist --license licenses.txt",
+    "lint": "eslint"
   },
   "keywords": [
     "github",
@@ -17,12 +18,16 @@
   "license": "MIT",
   "dependencies": {
     "@actions/core": "^1.2.6",
-    "@actions/github": "^4.0.0"
+    "@actions/github": "^6.0.0"
   },
   "devDependencies": {
-    "@vercel/ncc": "^0.27.0",
-    "eslint": "^7.29.0",
-    "eslint-config-airbnb-base": "^14.2.1",
-    "eslint-plugin-import": "^2.23.4"
-  }
+    "@eslint/eslintrc": "^3.2.0",
+    "@eslint/js": "^10.0.0",
+    "@vercel/ncc": "^0.38.3",
+    "eslint": "^9.15.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.23.4",
+    "globals": "^15.12.0"
+  },
+  "packageManager": "pnpm@9.14.2+sha512.6e2baf77d06b9362294152c851c4f278ede37ab1eba3a55fda317a4a17b209f4dbb973fb250a77abc463a341fcb1f17f17cfa24091c4eb319cda0d9b84278387"
 }

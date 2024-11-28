@@ -3,7 +3,7 @@ import * as github from '@actions/github';
 import { normalMode, recreateMode, appendMode, deleteMode } from './modes';
 import { getCommenter } from './comment/commenter';
 
-(async () => {
+export default async function main() {
   try {
     const repository = core.getInput('repository');
     const [owner, repo] = repository.split('/');
@@ -65,4 +65,4 @@ import { getCommenter } from './comment/commenter';
     console.error(error);
     core.setFailed(error.message);
   }
-})();
+}
