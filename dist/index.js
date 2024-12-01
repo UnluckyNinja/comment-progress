@@ -1,34 +1,32 @@
-'use strict';
-
-var require$$0 = require('os');
-var require$$0$1 = require('crypto');
-var require$$1 = require('fs');
-var require$$1$1 = require('tls');
-var require$$2$1 = require('http');
-var require$$3$1 = require('https');
-var require$$4$1 = require('events');
-var require$$0$2 = require('util');
-var require$$13 = require('stream/web');
-var require$$0$3 = require('assert');
-var require$$0$4 = require('stream');
-var require$$0$5 = require('net');
-var require$$7 = require('buffer');
-var require$$8 = require('querystring');
-var require$$0$6 = require('node:events');
-var require$$1$2 = require('node:util');
-var require$$0$7 = require('node:stream');
-var require$$0$8 = require('worker_threads');
-var require$$2$2 = require('perf_hooks');
-var require$$5 = require('util/types');
-var require$$4$2 = require('async_hooks');
-var require$$1$3 = require('console');
-var require$$1$4 = require('url');
-var require$$3$2 = require('zlib');
-var require$$6 = require('string_decoder');
-var require$$0$9 = require('diagnostics_channel');
-var require$$1$5 = require('path');
-var require$$2$3 = require('child_process');
-var require$$6$1 = require('timers');
+import require$$0 from 'os';
+import require$$0$1 from 'crypto';
+import require$$1 from 'fs';
+import require$$1$1 from 'tls';
+import require$$2$1 from 'http';
+import require$$3$1 from 'https';
+import require$$4$1 from 'events';
+import require$$0$2 from 'util';
+import require$$13 from 'stream/web';
+import require$$0$3 from 'assert';
+import require$$0$4 from 'stream';
+import require$$0$5 from 'net';
+import require$$7 from 'buffer';
+import require$$8 from 'querystring';
+import require$$0$6 from 'node:events';
+import require$$1$2 from 'node:util';
+import require$$0$7 from 'node:stream';
+import require$$0$8 from 'worker_threads';
+import require$$2$2 from 'perf_hooks';
+import require$$5 from 'util/types';
+import require$$4$2 from 'async_hooks';
+import require$$1$3 from 'console';
+import require$$1$4 from 'url';
+import require$$3$2 from 'zlib';
+import require$$6 from 'string_decoder';
+import require$$0$9 from 'diagnostics_channel';
+import require$$1$5 from 'path';
+import require$$2$3 from 'child_process';
+import require$$6$1 from 'timers';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -31231,67 +31229,12 @@ function getCommentPrefix(identifier) {
 var __defProp$1 = Object.defineProperty;
 var __defNormalProp$1 = (obj, key, value) => key in obj ? __defProp$1(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField$1 = (obj, key, value) => __defNormalProp$1(obj, typeof key !== "symbol" ? key + "" : key, value);
-class IssueCommenter {
-  constructor(octokit, { owner, repo, number }) {
+class CommitCommenter {
+  constructor(octokit, { owner, repo, commitSHA }) {
     __publicField$1(this, "octokit");
     __publicField$1(this, "owner");
     __publicField$1(this, "repo");
-    __publicField$1(this, "number");
-    this.octokit = octokit;
-    this.owner = owner;
-    this.repo = repo;
-    this.number = number;
-  }
-  createComment(content) {
-    return this.octokit.rest.issues.createComment({
-      owner: this.owner,
-      repo: this.repo,
-      issue_number: this.number,
-      body: content
-    });
-  }
-  updateComment(commentID, content) {
-    return this.octokit.rest.issues.updateComment({
-      owner: this.owner,
-      repo: this.repo,
-      comment_id: commentID,
-      body: content
-    });
-  }
-  deleteComment(commentID) {
-    return this.octokit.rest.issues.deleteComment({
-      owner: this.owner,
-      repo: this.repo,
-      comment_id: commentID
-    });
-  }
-  listComments(page, perPage) {
-    return this.octokit.rest.issues.listComments({
-      owner: this.owner,
-      repo: this.repo,
-      issue_number: this.number,
-      page,
-      per_page: perPage
-    });
-  }
-  getComment(commentID) {
-    return this.octokit.rest.issues.getComment({
-      owner: this.owner,
-      repo: this.repo,
-      comment_id: commentID
-    });
-  }
-}
-
-var __defProp = Object.defineProperty;
-var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-class CommitCommenter {
-  constructor(octokit, { owner, repo, commitSHA }) {
-    __publicField(this, "octokit");
-    __publicField(this, "owner");
-    __publicField(this, "repo");
-    __publicField(this, "commitSHA");
+    __publicField$1(this, "commitSHA");
     this.octokit = octokit;
     this.owner = owner;
     this.repo = repo;
@@ -31331,6 +31274,61 @@ class CommitCommenter {
   }
   getComment(commentID) {
     return this.octokit.rest.repos.getCommitComment({
+      owner: this.owner,
+      repo: this.repo,
+      comment_id: commentID
+    });
+  }
+}
+
+var __defProp = Object.defineProperty;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+class IssueCommenter {
+  constructor(octokit, { owner, repo, number }) {
+    __publicField(this, "octokit");
+    __publicField(this, "owner");
+    __publicField(this, "repo");
+    __publicField(this, "number");
+    this.octokit = octokit;
+    this.owner = owner;
+    this.repo = repo;
+    this.number = number;
+  }
+  createComment(content) {
+    return this.octokit.rest.issues.createComment({
+      owner: this.owner,
+      repo: this.repo,
+      issue_number: this.number,
+      body: content
+    });
+  }
+  updateComment(commentID, content) {
+    return this.octokit.rest.issues.updateComment({
+      owner: this.owner,
+      repo: this.repo,
+      comment_id: commentID,
+      body: content
+    });
+  }
+  deleteComment(commentID) {
+    return this.octokit.rest.issues.deleteComment({
+      owner: this.owner,
+      repo: this.repo,
+      comment_id: commentID
+    });
+  }
+  listComments(page, perPage) {
+    return this.octokit.rest.issues.listComments({
+      owner: this.owner,
+      repo: this.repo,
+      issue_number: this.number,
+      page,
+      per_page: perPage
+    });
+  }
+  getComment(commentID) {
+    return this.octokit.rest.issues.getComment({
       owner: this.owner,
       repo: this.repo,
       comment_id: commentID
@@ -31428,7 +31426,7 @@ function getHelpers(options) {
     return result.data;
   }
   function generateCommentContent(oldContent) {
-    return `${oldContent ? oldContent : getCommentPrefix(identifier)}
+    return `${oldContent || getCommentPrefix(identifier)}
 ${message}`;
   }
   return {
@@ -31547,9 +31545,9 @@ function isCorrectMode(mode) {
 function parseInputs() {
   const githubToken = coreExports.getInput("github-token", { required: true });
   const { owner, repo } = parseRepository(coreExports.getInput("repository"));
-  const issueNumber = parseInt(coreExports.getInput("issue-number")) || githubExports.context.issue?.number;
+  const issueNumber = Number.parseInt(coreExports.getInput("issue-number")) || githubExports.context.issue?.number;
   const commitSHA = coreExports.getInput("commit-sha") || githubExports.context.sha;
-  const commentID = parseInt(coreExports.getInput("comment-id"));
+  const commentID = Number.parseInt(coreExports.getInput("comment-id"));
   if (!commitSHA && !issueNumber && !commentID) {
     throw new Error("Faild to get commit or issue info from context. At least one of commit SHA, issue number, or comment id has to be provided to make this action work.");
   }
@@ -31594,7 +31592,7 @@ async function run() {
   });
   const mode = inputs.mode;
   const result = await operations[mode]();
-  coreExports.setOutput("comment-id", result?.id ?? null);
+  coreExports.setOutput("comment_id", result?.id ?? null);
   if (inputs.fail === "true") {
     coreExports.setFailed(inputs.message);
   }

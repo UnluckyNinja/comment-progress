@@ -28,44 +28,66 @@ If the workflow succeeds, the bot comments the details of the preview environmen
 - uses: hasura/comment-progress@v2.3.0
   with:
     # The GitHub token to be used when creating/updating comments
-    # ${{ secrets.GITHUB_TOKEN }} is provided by default by GitHub actions
+    # You can use ${{ secrets.GITHUB_TOKEN }}, which is provided in every workflow
+    # Required
     github-token: ${{ secrets.GITHUB_TOKEN }}
-
-    # The repository to which the pull request or issue belongs to
-    # ${{ github.repository }} gives the slug of the repository on which the action is running
-    repository: "my-org/my-repo"
-
-    # The pull request or issue number on which the comment should be made
-    number: ${{ github.event.number }}
-
-    # The commit sha on which the comment should be made
-    commit-sha: ${{ github.sha }}
 
     # Friendly identifier denoting the context of the comment
     # This id is hidden on the comment made and used for referring the same comment afterwards.
-    id: deploy-progress
+    # Required
+    identifier: deploy-progress
 
     # Markdown message to be used for commenting
-    message: "Thank you for opening this PR :pray:"
+    # Required
+    message: 'Thank you for opening this PR :pray:'
+
+    # The repository to which the pull request or issue belongs to
+    # Default to ${{ github.repository }}
+    repository: my-org/my-repo
+
+    # The pull request or issue number on which the comment should be made
+    # Default to ${{ github.event.number }} on PR or issue related event
+    issue-number: ${{ github.event.number }}
+
+    # The commit sha on which the comment should be made
+    # Default to ${{ github.sha }} on commit related event
+    commit-sha: ${{ github.sha }}
+
+    # Directly update specified comment instead of searching for identifier.
+    comment-id: ${{ steps.prev_progress.outputs.comment_id }}
+
+    # You can specify additional check on author. For example,
+    # if you are using GITHUB_TOKEN, it should be `github-actions[bot]`.
+    # Doesn't check by default.
+    author: github-actions[bot]
+
 
     # Comments on the PR/issue and fails the job
-    fail: true
+    # Default: false
+    fail: false
 
-    # Appends the message to a comment that already exits with the given id.
-    # If a comment with the given id is not found, a new comment is created
-    append: true
+    # Specified mode, default to replace, possible values are:
+    # - `update`(default), will replace the content of the old comment, (or create a new one).
+    # - `append`, will append content to the end of the comment, (or create a new one).
+    # - `recreate`, will delete old comment (if any), and post a new comment.
+    # - `delete`, will just delete the old comment, if any.
+    # - `report`, will only output related comment id, do nothing. `message` will be ignored.
+    # You can specify additional behavior with `skip-creating` and `skip-deleting`.
+    # default: update
+    mode: update
 
-    # Deletes all the existing comments matching the given id and
-    # creates a new comment with the given message
-    recreate: true
+    # Will create a new comment only if existing comment is found in `update`, `append`, `recreate` mode.
+    # If you want to completely skip it. Use step-level `if` instead.
+    # Default: false
+    skip-creating: false
 
-    # Deletes all the existing comments matching the given id
-    delete: true
+    # Will not delete the old comment in `recreate`, `delete` mode.
+    # Useful if you want to do something else with the old comment. (Custom id will be stripped out.)
+    # Default: false
+    skip-deleting: false
 ```
 
 **Note:** The `number` and `commit-sha` fields are mutually exclusive. Only one of them should be set in a job. If both or none are present, an error will be thrown and the job will fail.
-
-**Note**: The `append` and `recreate` fields are also mutually exclusive. If none of them are set, the job will continue in normal mode but if both are present an error will be thrown and the job will fail.
 
 ## Scenarios
 
@@ -86,17 +108,15 @@ on:
 
 jobs:
   thank-user:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     name: Say thanks for the PR
     steps:
       - name: comment on the pull request
-        uses: hasura/comment-progress@v2.3.0
+        uses: UnluckyNinja/comment-progress@v3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          repository: "my-org/my-repo"
-          number: ${{ github.event.number }}
-          id: thank-you-comment
-          message: "Thank you for opening this PR :pray:"
+          identifier: thank-you-comment
+          message: 'Thank you for opening this PR :pray:'
 ```
 
 ![say-thanks](images/normal-mode.png)
@@ -113,17 +133,17 @@ on:
 
 jobs:
   commit-comment:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     name: Comment on commit with some info
     steps:
       - name: Comment on commit
-        uses: hasura/comment-progress@v2.3.0
+        uses: UnluckyNinja/comment-progress@v3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          repository: "my-org/my-repo"
-          commit-sha: ${{ github.sha }}
-          id: commit-comment
-          message: "This is a commit comment :D."
+          # You can omit it if it's trigger by commit events
+          # commit-sha: ${{ github.sha }}
+          identifier: commit-comment
+          message: 'This is a commit comment :D.'
 ```
 
 ### Make a comment and append updates to the same comment
@@ -137,17 +157,16 @@ on:
 
 jobs:
   deploy-preview:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     name: Deploy preview
     steps:
       - name: Notify about starting this deployment
-        uses: hasura/comment-progress@v2.3.0
+        uses: UnluckyNinja/comment-progress@v3
+        id: progress
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          repository: "my-org/my-repo"
-          number: ${{ github.event.number }}
-          id: deploy-preview
-          message: "Starting deployment of this pull request."
+          identifier: deploy-preview
+          message: Starting deployment of this pull request.
 
       - name: Deploy preview
         run: |
@@ -155,14 +174,13 @@ jobs:
           # long running step
 
       - name: Notify about the result of this deployment
-        uses: hasura/comment-progress@v2.3.0
+        uses: UnluckyNinja/comment-progress@v3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          repository: "my-org/my-repo"
-          number: ${{ github.event.number }}
-          id: deploy-preview
-          message: "Deployment of a preview for this pull request was successful."
-          append: true
+          comment-id: ${{ steps.progress.outputs.comment_id }}
+          identifier: deploy-preview
+          message: Deployment of a preview for this pull request was successful.
+          mode: append
 ```
 
 ### Delete older/stale comment and add a new comment
@@ -174,22 +192,23 @@ on:
   workflow_dispatch:
     inputs:
       number:
-        description: "pull request number"
+        description: pull request number
         required: true
 
 jobs:
   deploy-preview:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     name: Deploy preview
     steps:
       - name: Notify about starting this deployment
-        uses: hasura/comment-progress@v2.3.0
+        uses: UnluckyNinja/comment-progress@v3
+        id: progress
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          repository: "my-org/my-repo"
           number: ${{ github.event.inputs.number }}
-          id: deploy-preview
-          message: "Starting deployment of this pull request."
+          identifier: deploy-preview
+          message: Starting deployment of this pull request.
+          mode: recreate
 
       - name: Deploy preview
         run: |
@@ -197,14 +216,13 @@ jobs:
           # long running step
 
       - name: Notify about the result of this deployment
-        uses: hasura/comment-progress@v2.3.0
+        uses: UnluckyNinja/comment-progress@v3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          repository: "my-org/my-repo"
-          number: ${{ github.event.inputs.number }}
-          id: deploy-preview
-          message: "Deployment of a preview for this pull request was successful."
-          recreate: true
+          comment-id: ${{ steps.progress.outputs.comment_id }}
+          identifier: deploy-preview
+          message: Deployment of a preview for this pull request was successful.
+          mode: update
 ```
 
 ## Delete a comment which is no longer relevant
@@ -222,12 +240,11 @@ jobs:
     name: Delete automated PR comments
     steps:
       - name: delete comment that contains a preview link
-        uses: hasura/comment-progress@v2.3.0
+        uses: UnluckyNinja/comment-progress@v3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          repository: "my-org/my-repo"
-          number: ${{ github.event.number }}
-          id: preview-url
+          identifier: preview-url
+          message: ''
 ```
 
 ## Contributing
