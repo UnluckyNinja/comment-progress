@@ -1,41 +1,62 @@
-name: 'Comment Progress'
+name: Comment Progress
 description: 'Notify progress by commenting on GitHub issues, pull requests, and commits'
 branding:
   icon: message-square
   color: white
+outputs:
+  comment_id:
+    description: The id of created or updated comment.
 inputs:
   github-token:
-    description: 'Github token'
+    description: >
+      Github token, you can set it as `secrets.GITHUB_TOKEN`. Beware though,
+      Comment changed using GITHUB_TOKEN will not trigger other workflow. 
     required: true
   repository:
-    description: 'Github repository'
-    required: true
-  number:
-    description: 'Github issue or pull request number'
-    required: false
+    description: Github repository, default to `github.repository`
+  issue-number:
+    description: Github issue or pull request number, default to triggering's
   commit-sha:
-    description: 'Commit SHA'
-    require: false
-  id:
-    description: 'Unique identifier for the comment'
+    description: Commit SHA
+  comment-id:
+    description: |
+      Will target specified comment. Can be useful with the output of previous run.
+      Specify this and identifier will not be used for finding comment.
+  author:
+    description: >
+      You can specify additional check on author. For example,
+      if you are using GITHUB_TOKEN, it should be `github-actions[bot]`.
+      Doesn't check by default.
+  identifier:
+    description: 'Custom unique identifier to store / look for in the comment, like `comment-progress`'
     required: true
   message:
-    description: 'Message to be commented'
+    description: Message to be commented.
     required: true
+  mode:
+    description: |
+      Specified mode, default to replace, possible values are:
+      - `update`(default), will replace the content of the old comment, (or create a new one).
+      - `append`, will append content to the end of the comment, (or create a new one).
+      - `recreate`, will delete old comment (if any), and post a new comment.
+      - `delete`, will just delete the old comment, if any.
+      - `report`, will only output related comment id, do nothing. `message` will be ignored.
+      You can specify additional behavior with `skip-creating` and `skip-deleting`.
+    default: update
   fail:
     description: 'If true, the step will be marked as failure'
-  append:
-    description: 'If true, message will be appended to existing comment'
-    required: false
-    default: false
-  recreate:
-    description: 'If true, message will be commented after deleting existing comment'
-    required: false
-    default: false
-  delete:
-    description: 'If true, the comment will be deleted'
-    required: false
-    default: false
+  skip-creating:
+    description: |
+      Will create a new comment only if existing comment is found in `update`, `append`, `recreate` mode.
+      If you want to completely skip it. Use step-level `if` instead.
+      Default: `'false'`
+    default: 'false'
+  skip-deleting:
+    description: |
+      Will not delete the old comment in `recreate`, `delete` mode.
+      Useful if you want to do something else with the old comment. (Custom id will be stripped out.)
+      Default: `'false'`
+    default: 'false'
 runs:
-  using: 'node20'
-  main: 'dist/index.js'
+  using: node20
+  main: dist/index.js

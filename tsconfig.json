@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "baseUrl": ".",
+    "rootDir": "./src",
+
+    "module": "Preserve",
+    "moduleResolution": "bundler",
+
+    "resolveJsonModule": true,
+
+    "allowImportingTsExtensions": true,
+    "allowJs": false,
+    "strict": true,
+
+    "noImplicitOverride": true,
+    "noEmit": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": false,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "skipLibCheck": false
+  },
+  "include": [
+    "src",
+    "test",
+    "eslint.*.js",
+    "rollup.*.js"
+  ]
+}

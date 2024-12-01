@@ -5,205 +5,375 @@ on:
     inputs:
       number:
         description: 'Issue/PR number'
-        required: true
       sha:
         description: 'Commit SHA'
-        required: true
 
 jobs:
-  issue-normal-mode:
-    runs-on: ubuntu-20.04
-    name: Normal mode progress for issue comments
+  check-inputs-number:
+    runs-on: ubuntu-latest
+    name: Check inputs for the run.
+    steps:
+      - if: ${{ !github.event.inputs.number }}
+        run: echo 'number is not specified' && exit 1
+  check-inputs-sha:
+    runs-on: ubuntu-latest
+    name: Check inputs for the run.
+    steps:
+      - if: ${{ !github.event.inputs.sha }}
+        run: echo 'SHA is not specified.' && exit 1
+
+  issue-update-mode:
+    runs-on: ubuntu-latest
+    needs: check-inputs-number
+    name: Update mode progress for issue comments
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: normal mode - create comment
-        uses: hasura/comment-progress@test
+      - name: update mode - create comment
+        uses: ./
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          repository: 'hasura/comment-progress'
-          number: ${{ github.event.inputs.number }}
-          id: normal-mode-comment
-          message: 'normal mode - create comment'
+          issue-number: ${{ github.event.inputs.number }}
+          identifier: update-mode-comment
+          message: 'update mode - create comment'
 
       - name: Do some work
-        run: echo "this step just prints this"
+        run: echo "this step just prints this" && sleep 1
 
-      - name: normal mode - update comment
-        uses: hasura/comment-progress@test
+      - name: update mode - update comment
+        id: update
+        uses: ./
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          repository: 'hasura/comment-progress'
-          number: ${{ github.event.inputs.number }}
-          id: normal-mode-comment
-          message: 'normal mode - update comment'
+          issue-number: ${{ github.event.inputs.number }}
+          identifier: update-mode-comment
+          message: 'update mode - update comment'
+
+      - name: Do some work
+        run: echo "this step just prints this" && sleep 1
+
+      - name: update mode - update comment with id
+        uses: ./
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.inputs.number }}
+          identifier: update-mode-comment
+          message: 'update mode - update comment with id'
+          comment-id: ${{ steps.update.outputs.comment_id}}
+
+      - name: Do some work
+        run: echo "this step just prints this" && sleep 1
+
+      - name: update mode - update comment skip creating
+        uses: ./
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.inputs.number }}
+          identifier: update-mode-comment-1
+          message: 'update mode - update-mode-comment-1 - This should be skipped.'
+          skip-creating: true
 
   issue-append-mode:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    needs: check-inputs-number
     name: Append mode progress for issue comments
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: append mode - create comment
-        uses: hasura/comment-progress@test
+        uses: ./
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          repository: 'hasura/comment-progress'
-          number: ${{ github.event.inputs.number }}
-          id: append-mode-comment
+          issue-number: ${{ github.event.inputs.number }}
+          identifier: append-mode-comment
           message: 'append mode - create comment'
+          mode: append
 
       - name: Do some work
-        run: echo "this step just prints this"
+        run: echo "this step just prints this" && sleep 1
 
       - name: append mode - append comment
-        uses: hasura/comment-progress@test
+        id: append
+        uses: ./
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          repository: 'hasura/comment-progress'
-          number: ${{ github.event.inputs.number }}
-          id: append-mode-comment
-          append: true
+          issue-number: ${{ github.event.inputs.number }}
+          identifier: append-mode-comment
           message: 'append mode - appended message to the create comment'
+          mode: append
+
+      - name: Do some work
+        run: echo "this step just prints this" && sleep 1
+
+      - name: append mode - append comment with id
+        uses: ./
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.inputs.number }}
+          comment-id: ${{steps.append.outputs.comment_id}}
+          identifier: append-mode-comment
+          message: 'append mode - appended message to the create comment with id'
+          mode: append
+
+      - name: Do some work
+        run: echo "this step just prints this" && sleep 1
+
+      - name: append mode - append comment skip creating
+        uses: ./
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.inputs.number }}
+          identifier: append-mode-comment
+          message: 'append mode - append-mode-comment-1 - This should be skipped.'
+          mode: append
+          skip-creating: true
 
   issue-recreate-mode:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    needs: check-inputs-number
     name: Recreate mode progress for issue comments
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: recreate mode - create comment
-        uses: hasura/comment-progress@test
+        uses: ./
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          repository: 'hasura/comment-progress'
-          number: ${{ github.event.inputs.number }}
-          id: recreate-mode-comment
+          issue-number: ${{ github.event.inputs.number }}
+          identifier: recreate-mode-comment
           message: 'recreate mode - create comment'
+          mode: recreate
 
       - name: Do some work
-        run: echo "this step just prints this"
+        run: echo "this step just prints this" && sleep 1
 
-      - name: recreate mode - append comment
-        uses: hasura/comment-progress@test
+      - name: recreate mode - recreate comment
+        id: recreate
+        uses: ./
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          repository: 'hasura/comment-progress'
-          number: ${{ github.event.inputs.number }}
-          id: recreate-mode-comment
-          recreate: true
+          issue-number: ${{ github.event.inputs.number }}
+          identifier: recreate-mode-comment
           message: 'recreate mode - latest comment (should be posted after deleting the create comment)'
+          mode: recreate
 
-  commit-normal-mode:
-    runs-on: ubuntu-20.04
-    name: Normal mode progress for commit comments
+      - name: Do some work
+        run: echo "this step just prints this" && sleep 1
+
+      - name: recreate mode - recreate comment with id
+        uses: ./
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.inputs.number }}
+          comment-id: ${{ steps.recreate.outputs.comment_id }}
+          identifier: recreate-mode-comment
+          message: 'recreate mode - latest comment with id (should be posted after deleting the create comment)'
+          mode: recreate
+
+      - name: Do some work
+        run: echo "this step just prints this" && sleep 1
+
+      - name: recreate mode - recreate comment skip all
+        uses: ./
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.inputs.number }}
+          identifier: recreate-mode-comment
+          message: 'recreate mode - This should be skipped.'
+          mode: recreate
+          skip-deleting: true
+          skip-creating: true
+
+      - name: recreate mode - recreate comment skip creating
+        uses: ./
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.inputs.number }}
+          identifier: recreate-mode-comment-1
+          message: 'recreate mode - This should be skipped.'
+          mode: recreate
+          skip-creating: true
+
+  commit-update-mode:
+    runs-on: ubuntu-latest
+    needs: check-inputs-sha
+    name: Update mode progress for commit comments
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: normal mode - create comment
-        uses: hasura/comment-progress@test
+      - name: update mode - create comment
+        uses: ./
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          repository: 'hasura/comment-progress'
           commit-sha: ${{ github.event.inputs.sha }}
-          id: normal-mode-comment
-          message: 'normal mode - create comment'
+          identifier: update-mode-comment
+          message: 'update mode - create comment'
 
       - name: Do some work
-        run: echo "this step just prints this"
+        run: echo "this step just prints this" && sleep 1
 
-      - name: normal mode - update comment
-        uses: hasura/comment-progress@test
+      - name: update mode - update comment
+        id: update
+        uses: ./
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          repository: 'hasura/comment-progress'
           commit-sha: ${{ github.event.inputs.sha }}
-          id: normal-mode-comment
-          message: 'normal mode - update comment'
+          identifier: update-mode-comment
+          message: 'update mode - update comment'
+
+      - name: Do some work
+        run: echo "this step just prints this" && sleep 1
+
+      - name: update mode - update comment with id
+        uses: ./
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          commit-sha: ${{ github.event.inputs.sha }}
+          comment-id: ${{ steps.update.outputs.comment_id}}
+          identifier: update-mode-comment
+          message: 'update mode - update comment'
+
+      - name: Do some work
+        run: echo "this step just prints this" && sleep 1
+
+      - name: update mode - update comment skip creating
+        uses: ./
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          commit-sha: ${{ github.event.inputs.sha }}
+          identifier: update-mode-comment-1
+          message: 'update mode - update-mode-comment-1 - This should be skipped'
+          skip-creating: true
 
   commit-append-mode:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    needs: check-inputs-sha
     name: Append mode progress for commit comments
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: append mode - create comment
-        uses: hasura/comment-progress@test
+        uses: ./
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          repository: 'hasura/comment-progress'
           commit-sha: ${{ github.event.inputs.sha }}
-          id: append-mode-comment
+          identifier: append-mode-comment
           message: 'append mode - create comment'
+          mode: append
 
       - name: Do some work
-        run: echo "this step just prints this"
+        run: echo "this step just prints this" && sleep 1
 
       - name: append mode - append comment
-        uses: hasura/comment-progress@test
+        id: append
+        uses: ./
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          repository: 'hasura/comment-progress'
           commit-sha: ${{ github.event.inputs.sha }}
-          id: append-mode-comment
-          append: true
+          identifier: append-mode-comment
           message: 'append mode - appended message to the create comment'
+          mode: append
+
+      - name: Do some work
+        run: echo "this step just prints this" && sleep 1
+
+      - name: append mode - append comment with id
+        uses: ./
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          commit-sha: ${{ github.event.inputs.sha }}
+          comment-id: ${{steps.append.outputs.comment_id}}
+          identifier: append-mode-comment
+          message: 'append mode - appended message to the create comment with id'
+          mode: append
+
+      - name: Do some work
+        run: echo "this step just prints this" && sleep 1
+
+      - name: append mode - append comment skip creating
+        uses: ./
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          commit-sha: ${{ github.event.inputs.sha }}
+          identifier: append-mode-comment
+          message: 'append mode - append-mode-comment-1 - This should be skipped.'
+          mode: append
+          skip-creating: true
 
   commit-recreate-mode:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    needs: check-inputs-sha
     name: Recreate mode progress for commit comments
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: recreate mode - create comment
-        uses: hasura/comment-progress@test
+        uses: ./
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          repository: 'hasura/comment-progress'
           commit-sha: ${{ github.event.inputs.sha }}
-          id: recreate-mode-comment
+          identifier: recreate-mode-comment
           message: 'recreate mode - create comment'
+          mode: recreate
 
       - name: Do some work
-        run: echo "this step just prints this"
+        run: echo "this step just prints this" && sleep 1
 
-      - name: recreate mode - append comment
-        uses: hasura/comment-progress@test
+      - name: recreate mode - recreate comment
+        id: recreate
+        uses: ./
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          repository: 'hasura/comment-progress'
           commit-sha: ${{ github.event.inputs.sha }}
-          id: recreate-mode-comment
-          recreate: true
+          identifier: recreate-mode-comment
           message: 'recreate mode - latest comment (should be posted after deleting the create comment)'
+          mode: recreate
 
-  fail-mode-append-recreate:
-    runs-on: ubuntu-20.04
-    name: Fail when both append and recreate given
-    continue-on-error: true
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Do some work
+        run: echo "this step just prints this" && sleep 1
 
-      - name: Should error out and not comment anything
-        uses: hasura/comment-progress@test
+      - name: recreate mode - recreate comment with id
+        uses: ./
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          repository: 'hasura/comment-progress'
-          number: ${{ github.event.inputs.number }}
-          id: fail-mode-comment
-          recreate: true
-          append: true
-          message: 'should error out as recreate and append mode could not be used together.'
+          commit-sha: ${{ github.event.inputs.sha }}
+          comment-id: ${{ steps.recreate.outputs.comment_id }}
+          identifier: recreate-mode-comment
+          message: 'recreate mode - latest comment with id (should be posted after deleting the create comment)'
+          mode: recreate
+
+      - name: Do some work
+        run: echo "this step just prints this" && sleep 1
+
+      - name: recreate mode - recreate comment skip all
+        uses: ./
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          commit-sha: ${{ github.event.inputs.sha }}
+          identifier: recreate-mode-comment
+          message: 'recreate mode - This should be skipped.'
+          mode: recreate
+          skip-deleting: true
+          skip-creating: true
+
+      - name: recreate mode - recreate comment skip creating
+        uses: ./
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          commit-sha: ${{ github.event.inputs.sha }}
+          identifier: recreate-mode-comment-1
+          message: 'recreate mode - This should be skipped.'
+          mode: recreate
+          skip-creating: true
 
   fail-mode-issue-commit-both:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     name: Fail when both number and sha given
     continue-on-error: true
     steps:
@@ -211,17 +381,21 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Error out
-        uses: hasura/comment-progress@test
+        id: check
+        continue-on-error: true
+        uses: ./
         with:
           github-token: ${{secrets.GITHUB_TOKEN }}
-          repository: 'hasura/comment-progress'
-          number: ${{ github.event.inputs.number }}
+          issue-number: ${{ github.event.inputs.number }}
           commit-sha: ${{ github.event.inputs.sha }}
-          id: fail-mode-issue-commit-both
+          identifier: fail-mode-issue-commit-both
           message: 'should error out as both number and sha fields are given'
 
+      - if: ${{ steps.check.outcome != 'failure' }}
+        run: echo 'It failed to throw an error.' && exit 1
+
   fail-mode-issue-commit-none:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     name: Fail when both number and sha not given
     continue-on-error: true
     steps:
@@ -229,15 +403,19 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Error out
-        uses: hasura/comment-progress@test
+        id: check
+        continue-on-error: true
+        uses: ./
         with:
           github-token: ${{secrets.GITHUB_TOKEN }}
-          repository: 'hasura/comment-progress'
-          id: fail-mode-issue-commit-none
+          identifier: fail-mode-issue-commit-none
           message: 'should error out as both number and sha fields are not given'
 
+      - if: ${{ steps.check.outcome != 'failure' }}
+        run: echo 'It failed to throw an error.' && exit 1
+
   fail-comment:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     name: Fail comment progress
     continue-on-error: true
     steps:
@@ -245,12 +423,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Should comment and fail this job
-        uses: hasura/comment-progress@test
+        uses: ./
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          repository: 'hasura/comment-progress'
-          number: ${{ github.event.inputs.number }}
-          id: fail-comment
+          issue-number: ${{ github.event.inputs.number }}
+          identifier: fail-comment
           fail: true
           message: ':x: This comment is to denote an error.'
 
