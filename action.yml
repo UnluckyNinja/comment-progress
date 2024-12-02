@@ -15,9 +15,10 @@ inputs:
   repository:
     description: Github repository, default to `github.repository`
   issue-number:
-    description: Github issue or pull request number, default to triggering's
+    description: Github issue or pull request number, default to related event.
   commit-sha:
-    description: Commit SHA
+    description: Commit SHA, default to empty, you can use context variable `github.sha`
+    default: ''
   comment-id:
     description: |
       Will target specified comment. Can be useful with the output of previous run.

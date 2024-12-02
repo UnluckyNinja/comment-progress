@@ -1,4 +1,4 @@
-import { getInput, setFailed, setOutput } from '@actions/core';
+import { debug, getInput, setFailed, setOutput } from '@actions/core';
 import { context, getOctokit } from '@actions/github';
 import { getCommenter } from './comment/commenter.js';
 import createOperations from './modes.js';
@@ -26,7 +26,9 @@ function parseInputs() {
   const { owner, repo } = parseRepository(getInput('repository'))
 
   const issueNumber = Number.parseInt(getInput('issue-number')) || context.issue?.number
-  const commitSHA = getInput('commit-sha') || context.sha
+  const commitSHA = getInput('commit-sha')
+  debug(`context.issue.number: ${ context.issue?.number }`)
+  debug(`context.sha: ${ context.sha }`)
   const commentID = Number.parseInt(getInput('comment-id'))
   if (!commitSHA && !issueNumber && !commentID) {
     throw new Error('Faild to get commit or issue info from context. '

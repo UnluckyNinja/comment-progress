@@ -125,7 +125,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.inputs.number }}
-          identifier: append-mode-comment
+          identifier: append-mode-comment-1
           message: 'append mode - append-mode-comment-1 - This should be skipped.'
           mode: append
           skip-creating: true
@@ -300,7 +300,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           commit-sha: ${{ github.event.inputs.sha }}
-          identifier: append-mode-comment
+          identifier: append-mode-comment-1
           message: 'append mode - append-mode-comment-1 - This should be skipped.'
           mode: append
           skip-creating: true
@@ -375,7 +375,7 @@ jobs:
   fail-mode-issue-commit-both:
     runs-on: ubuntu-latest
     name: Fail when both number and sha given
-    continue-on-error: true
+    if: ${{ github.event.inputs.number && github.event.inputs.sha }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -397,7 +397,7 @@ jobs:
   fail-mode-issue-commit-none:
     runs-on: ubuntu-latest
     name: Fail when both number and sha not given
-    continue-on-error: true
+    if: ${{ !github.event.inputs.number && !github.event.inputs.sha }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -417,17 +417,22 @@ jobs:
   fail-comment:
     runs-on: ubuntu-latest
     name: Fail comment progress
+    if: ${{ github.event.inputs.number }}
     continue-on-error: true
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Should comment and fail this job
+        id: fail
+        continue-on-error: true
         uses: ./
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.inputs.number }}
           identifier: fail-comment
           fail: true
-          message: ':x: This comment is to denote an error.'
+          message: '`fail-comment` - The job''s final status should be success.'
 
+      - if: ${{ steps.fail.outcome != 'failure' }}
+        run: echo 'It failed to throw an error.' && exit 1

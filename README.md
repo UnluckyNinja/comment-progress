@@ -50,7 +50,7 @@ If the workflow succeeds, the bot comments the details of the preview environmen
     issue-number: ${{ github.event.number }}
 
     # The commit sha on which the comment should be made
-    # Default to ${{ github.sha }} on commit related event
+    # Default to emtpy, you can use ${{ github.sha }} in most events.
     commit-sha: ${{ github.sha }}
 
     # Directly update specified comment instead of searching for identifier.
@@ -140,8 +140,7 @@ jobs:
         uses: UnluckyNinja/comment-progress@v3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          # You can omit it if it's trigger by commit events
-          # commit-sha: ${{ github.sha }}
+          commit-sha: ${{ github.sha }}
           identifier: commit-comment
           message: 'This is a commit comment :D.'
 ```

@@ -31342,8 +31342,8 @@ function getCommenter(octokit, {
   number,
   commitSHA
 }) {
-  if (number && commitSHA || !number && !commitSHA) {
-    throw new Error("Either set the `number` or the `commit-sha` field.");
+  if (number && commitSHA) {
+    throw new Error(`'number': ${number}, 'commit-sha': ${commitSHA}, there should be only of of the two.`);
   }
   if (number) {
     return new IssueCommenter(octokit, { owner, repo, number });
@@ -31546,7 +31546,9 @@ function parseInputs() {
   const githubToken = coreExports.getInput("github-token", { required: true });
   const { owner, repo } = parseRepository(coreExports.getInput("repository"));
   const issueNumber = Number.parseInt(coreExports.getInput("issue-number")) || githubExports.context.issue?.number;
-  const commitSHA = coreExports.getInput("commit-sha") || githubExports.context.sha;
+  const commitSHA = coreExports.getInput("commit-sha");
+  coreExports.debug(`context.issue.number: ${githubExports.context.issue?.number}`);
+  coreExports.debug(`context.sha: ${githubExports.context.sha}`);
   const commentID = Number.parseInt(coreExports.getInput("comment-id"));
   if (!commitSHA && !issueNumber && !commentID) {
     throw new Error("Faild to get commit or issue info from context. At least one of commit SHA, issue number, or comment id has to be provided to make this action work.");

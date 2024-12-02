@@ -16,8 +16,8 @@ interface Options {
 export function getCommenter(octokit: Octokit, {
   owner, repo, number, commitSHA
 }: Options) {
-  if ((number && commitSHA) || (!number && !commitSHA)) {
-    throw new Error('Either set the `number` or the `commit-sha` field.');
+  if (number && commitSHA) {
+    throw new Error(`'number': ${number}, 'commit-sha': ${commitSHA}, there should be only of of the two.`);
   }
   if (number) {
     return new IssueCommenter(octokit, { owner, repo, number });
